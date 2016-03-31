@@ -8,6 +8,7 @@ class Coast {
    vector<vector<int>> vmap;
    bool isLake = true;
 
+   // Starts recursive methods
    void lakeCheckMain(int y, int x){
       vmap[y][x] = 10;
       if(vmap[y-1][x] == 0){
@@ -24,15 +25,14 @@ class Coast {
       }
 
       if(isLake){
-         //cout << y << x << " was lake, starting coloring" << endl;
          lakeColor(y, x);
       }
       else{
-         vmap[y][x] = 0;
-         //cout << y << x << " was not lake" << endl;
+         lakeDeColor(y, x);
       }
    }
 
+   // Assign value 4 to all connected water
    void lakeColor(int y, int x){
       vmap[y][x] = 4;
       if(vmap[y-1][x] == 0 || vmap[y-1][x] == 10){
@@ -49,6 +49,25 @@ class Coast {
       }
    }
 
+   // Assigns 0 to all checked water fields
+   void lakeDeColor(int y, int x){
+      //cout << "lets decolor" << endl;
+      vmap[y][x] = 0;
+      if(vmap[y-1][x] == 10){
+         lakeDeColor(y-1, x);
+      }
+      if(vmap[y+1][x] == 10){
+         lakeDeColor(y+1, x);
+      }
+      if(vmap[y][x-1] == 10){
+         lakeDeColor(y, x-1);
+      }
+      if(vmap[y][x+1] == 10){
+         lakeDeColor(y, x+1);
+      }
+   }
+
+   // Checks neightboring fields for what and stops if edge is reached
    void lakeCheck(int y, int x){
       if((y < 1) || (x < 1) || (x > m) || (y > n) || !isLake){
          isLake = false;
@@ -72,9 +91,6 @@ class Coast {
             lakeCheck(y, x+1);
          }
       }
-      if(!isLake){
-         vmap[y][x] = 0;
-      }
    }
 
 
@@ -84,15 +100,9 @@ class Coast {
       cin >> n >> m;
 
       //Map init
-      vmap.resize(m+2);
-      for(int i = 0 ; i < m+2 ; ++i){
-    	    vmap[i].resize(n+2);
-      }
-
-      for (size_t i = 1; i <= n; i++) {
-         for (size_t q = 1; q <= m; q++) {
-            cin >> vmap[i][q];
-         }
+      vmap.resize(n+2);
+      for(int i = 0 ; i < n+2 ; ++i){
+    	   vmap[i].resize(m+2);
       }
 
       // -1, m to 0
@@ -100,10 +110,22 @@ class Coast {
       for (size_t i = 0; i <= m; i++) {
             vmap[0][i] = 0;
             vmap[n+1][i] = 0;
+      }
+      for (size_t i = 0; i <= n; i++) {
             vmap[i][0] = 0;
             vmap[i][m+1] = 0;
       }
 
+      for (size_t i = 0; i < n; i++) {
+         string tempStrng;
+         cin >> tempStrng;
+         for (size_t j = 0; j < m; j++) {
+            int binVal = tempStrng.at(j) - 48;
+            vmap[i+1][j+1] = binVal;
+         }
+      }
+
+      // Sets all land fields to 4 as well as setting all inland lakes to the value 4
       for (size_t i = 1; i <= n; i++) {
          for (size_t q = 1; q <= m; q++) {
             if(vmap[i][q] == 1){
@@ -111,11 +133,23 @@ class Coast {
             }
             else if(vmap[i][q] == 0){
                isLake = true;
+               //cout << i << ", " << q << " checking water" << endl;
                lakeCheckMain(i, q);
             }
          }
       }
 
+      /*string resultStr;
+      for (size_t i = 1; i < n+1; i++) {
+         for (size_t q = 1; q < m+1; q++) {
+            resultStr += to_string(vmap[i][q]);
+         }
+         resultStr += "\n";
+      }
+      cout << resultStr << endl;*/
+
+      //Dynamically goes through the map from top left and looks left and above for other land
+      //Skips water
       for (size_t i = 1; i <= n; i++) {
          for (size_t q = 1; q <= m; q++) {
             if(vmap[i][q] == 0){
@@ -131,15 +165,6 @@ class Coast {
             }
          }
       }
-
-      /*string resultStr;
-      for (size_t i = 1; i < n+1; i++) {
-         for (size_t q = 1; q < m+1; q++) {
-            resultStr += to_string(vmap[i][q]) + " ";
-         }
-         resultStr += "\n";
-      }
-      cout << resultStr << endl;*/
 
       for (size_t i = 0; i <= n; i++) {
          for (size_t q = 0; q <= m; q++) {
